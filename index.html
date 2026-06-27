@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UrbanWellness GIS - 3D Game Mode Revision</title>
+    <title>UrbanWellness GIS - Kartu Bahagia</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
     <!-- Leaflet & Heatmap Plugin -->
@@ -11,10 +11,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
     
-    <!-- 🌍 IMPORT CESIUM JS -->
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="bg-gradient-to-tr from-sky-50 via-purple-50 to-emerald-50 text-slate-700 font-sans antialiased min-h-screen flex flex-col transition-all duration-500 overflow-x-hidden">
@@ -150,7 +146,7 @@
                 </h2>
                 <div id="info-board-content" class="flex-1 flex flex-col items-center justify-center text-center p-5 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 transition-all">
                     <span class="text-4xl mb-3 animate-bounce">👆</span>
-                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed">Klik salah satu titik lokasi di peta (2D/3D) untuk melihat detail informasi bangunan di sini.</p>
+                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed">Klik salah satu titik lokasi di peta 2D untuk melihat detail informasi bangunan di sini.</p>
                 </div>
             </div>
 
@@ -229,19 +225,19 @@
                 </div>
             </div>
 
-            <!-- 4. Kontrol Jelajah & Ukur Jarak -->
+            <!-- 4. Kartu Bahagia & Ukur Jarak -->
             <div class="bg-white/90 backdrop-blur-md border border-white rounded-3xl p-5 shadow-xl shadow-slate-200/50 flex-1">
                 <h2 class="text-xs font-black text-sky-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span>🎮</span> Kontrol Jelajah & Ukur Jarak
+                    <span>🎴</span> Kartu Bahagia & Ukur Jarak
                 </h2>
                 <p class="text-[10px] text-slate-500 font-medium leading-relaxed mb-4">
-                    Garis rute dash yang tidak jelas sudah dihapus. Bagian ini sekarang fokus untuk jelajah 3D dan pengukuran jarak manual di peta 2D.
+                    Mode 3D sudah dihapus. Sebagai gantinya, ada mini game Kartu Bahagia berisi pesan semangat yang muncul secara acak.
                 </p>
-                <button onclick="startGameMode3D()" class="w-full mb-3 text-xs bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white font-bold py-3 px-4 rounded-2xl cursor-pointer transition-colors shadow-lg flex justify-center items-center gap-2">
-                    🎮 Mulai Jelajah 3D
+                <button onclick="openHappyCards()" class="w-full mb-3 text-xs bg-gradient-to-r from-pink-500 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white font-bold py-3 px-4 rounded-2xl cursor-pointer transition-colors shadow-lg flex justify-center items-center gap-2">
+                    🎴 Main Kartu Bahagia
                 </button>
 
-                <!-- Fitur Ukur Jarak Manual ASLI LU -->
+                <!-- Fitur Ukur Jarak Manual ASLI -->
                 <button id="btn-distance-mode" onclick="toggleDistanceMode()" class="w-full text-xs bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-bold py-3 px-4 rounded-2xl cursor-pointer transition-colors shadow-lg flex justify-center items-center gap-2">
                     📏 Mode Ukur Jarak Manual
                 </button>
@@ -281,31 +277,57 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200">
-                        <button id="btn-2d" onclick="switchEngine('2d')" class="px-5 py-2 text-xs font-bold rounded-xl bg-white text-indigo-600 shadow-md cursor-pointer transition-all">2D Map</button>
-                        <button id="btn-3d" onclick="switchEngine('3d')" class="px-5 py-2 text-xs font-bold rounded-xl text-slate-500 cursor-pointer hover:text-indigo-600 hover:bg-white/50 transition-all">3D Game Mode</button>
+                        <button id="btn-2d" onclick="switchEngine('2d')" class="px-5 py-2 text-xs font-bold rounded-xl bg-white text-indigo-600 shadow-md cursor-pointer transition-all">2D Map Aktif</button>
                     </div>
-                    <button id="btn-start-game" onclick="startGameMode3D()" class="hidden md:inline-flex px-4 py-2 text-xs font-black rounded-2xl bg-violet-500 text-white shadow-md hover:bg-violet-600 active:scale-95 transition">🎮 Jelajah</button>
+                    <button onclick="openHappyCards()" class="hidden md:inline-flex px-4 py-2 text-xs font-black rounded-2xl bg-pink-500 text-white shadow-md hover:bg-pink-600 active:scale-95 transition">🎴 Kartu Bahagia</button>
                 </div>
             </div>
             
             <div class="w-full flex-1 relative bg-slate-100">
                 <div id="map-leaflet" class="absolute inset-0 z-10"></div>
-                <!-- 🌍 KONTAINER PETA CESIUM -->
-                <div id="map-cesium" class="absolute inset-0 z-0"></div>
-                <div id="game-hud" class="hidden absolute left-4 bottom-4 z-[1600] max-w-sm bg-white/95 backdrop-blur-md rounded-3xl border border-violet-100 shadow-2xl p-4">
-                    <div class="flex items-center justify-between gap-3 mb-2">
-                        <div>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-violet-500">3D Game Control</p>
-                            <h3 class="text-sm font-black text-slate-800">Jelajah Kota Interaktif</h3>
-                        </div>
-                        <button onclick="resetAvatarPosition()" class="text-[10px] font-black bg-violet-50 text-violet-600 border border-violet-100 px-3 py-1.5 rounded-xl">Reset</button>
-                    </div>
-                    <p class="text-[10px] text-slate-500 font-semibold leading-relaxed">W/A/S/D atau panah untuk bergerak. Q/E untuk berputar. Tahan Shift untuk lebih cepat. Info akan muncul saat karakter masuk ke zona buffer lokasi.</p>
-                    <div id="game-zone-status" class="mt-3 rounded-2xl bg-slate-50 border border-slate-100 p-3 text-[11px] font-bold text-slate-500">Belum masuk zona buffer.</div>
-                </div>
             </div>
         </section>
     </main>
+
+
+    <!-- Mini Game Kartu Bahagia -->
+    <div id="happy-card-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[3100] hidden items-center justify-center p-4">
+        <div class="happy-game-shell relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white">
+            <div class="absolute -top-28 -left-24 w-72 h-72 bg-pink-200 rounded-full blur-3xl opacity-70 pointer-events-none"></div>
+            <div class="absolute -bottom-28 -right-24 w-80 h-80 bg-amber-200 rounded-full blur-3xl opacity-70 pointer-events-none"></div>
+
+            <button onclick="closeHappyCards()" class="absolute top-5 right-5 z-20 w-10 h-10 rounded-full bg-white/90 text-slate-600 shadow-md hover:bg-rose-50 hover:text-rose-500 font-black transition">×</button>
+
+            <div class="relative z-10 p-6 md:p-10">
+                <div class="text-center max-w-3xl mx-auto mb-7">
+                    <span class="inline-flex items-center gap-2 text-[10px] md:text-xs font-black tracking-[0.25em] uppercase text-pink-600 bg-pink-50 border border-pink-100 px-4 py-2 rounded-full mb-4">
+                        🎴 Mini Game Relaksasi
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-3">Kartu Bahagia</h2>
+                    <p class="text-xs md:text-sm text-slate-500 font-semibold leading-relaxed">
+                        Pilih satu dari empat kartu. Setiap kartu berisi pesan singkat yang dibuat untuk memberi semangat, rasa tenang, dan energi positif.
+                    </p>
+                </div>
+
+                <div id="happy-card-instruction" class="text-center mb-5">
+                    <p class="text-[11px] md:text-xs font-black text-amber-600 uppercase tracking-widest">Klik salah satu kartu di bawah ini</p>
+                </div>
+
+                <div id="happy-card-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5"></div>
+
+                <div id="happy-card-result" class="hidden mt-7 text-center bg-gradient-to-r from-pink-50 to-amber-50 border border-pink-100 rounded-3xl p-5 shadow-inner">
+                    <span class="text-3xl block mb-2">✨</span>
+                    <h3 id="happy-result-title" class="text-lg font-black text-slate-800 mb-2">Kartu Terpilih</h3>
+                    <p id="happy-result-text" class="text-sm md:text-base font-bold text-slate-600 leading-relaxed max-w-2xl mx-auto"></p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center mt-7">
+                    <button onclick="shuffleHappyCards()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-amber-400 text-white text-xs font-black shadow-lg hover:scale-105 active:scale-95 transition">🔄 Acak Kartu Lagi</button>
+                    <button onclick="closeHappyCards()" class="px-6 py-3 rounded-2xl bg-white text-slate-600 border border-slate-200 text-xs font-black shadow-sm hover:bg-slate-50 active:scale-95 transition">Kembali ke Peta</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Nafas Fresh Theme + MOOD CHECK -->
     <div id="breathing-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[3000] hidden flex items-center justify-center p-4 transition-opacity">

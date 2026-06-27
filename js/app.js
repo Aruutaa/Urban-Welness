@@ -96,7 +96,7 @@ function set3DUnavailable(message) {
     if (statusEl && message) statusEl.textContent = message;
     if (btn3d) {
         btn3d.classList.add('opacity-50', 'cursor-not-allowed');
-        btn3d.title = '3D tidak aktif. Cek koneksi CDN Cesium atau dukungan WebGL browser.';
+        btn3d.title = 'Mode 3D sudah dihapus dan diganti Kartu Bahagia.';
     }
     if (gameBtn) gameBtn.classList.add('hidden');
 }
@@ -109,7 +109,7 @@ function safeStatus(message) {
 function initCesiumEngine() {
     if (typeof Cesium === 'undefined') {
         cesiumReady = false;
-        set3DUnavailable('2D aktif. Cesium CDN gagal dimuat.');
+        set3DUnavailable('2D aktif. Mode 3D sudah dihapus.');
         return;
     }
 
@@ -284,9 +284,9 @@ window.updateSidebarInfo = function(loc) {
             <div class="mt-auto pt-3 border-t border-slate-200">
                 <p class="text-[11px] text-slate-500 font-medium leading-relaxed flex items-start gap-1.5"><span class="text-rose-400 text-base">📍</span> ${loc.alamat}</p>
             </div>
-            <button onclick="focusLocationIn3D(${loc.coord[0]}, ${loc.coord[1]}, '${loc.name.replace(/'/g, "\\'")}')" 
-                class="mt-4 w-full py-2.5 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2">
-                🎮 Lihat di 3D Game
+            <button onclick="openHappyCards()" 
+                class="mt-4 w-full py-2.5 bg-gradient-to-r from-pink-500 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white text-xs font-bold rounded-xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2">
+                🎴 Ambil Kartu Bahagia
             </button>
         </div>
     `;
@@ -1052,7 +1052,7 @@ function renderActivityCards(items, sourceLabel = 'OpenStreetMap') {
         const safeKeyword = escapeHTML(item.keyword);
         const safeTitle = escapeHTML(item.kind.title);
         return `
-            <div onclick="focusLocationIn3D(${coords[0]}, ${coords[1]}, 'Aktivitas Publik')" class="activity-live-card p-3 rounded-2xl border cursor-pointer ${styleClass}">
+            <div onclick="focusMapLocation(${coords[0]}, ${coords[1]}, 'Aktivitas Publik')" class="activity-live-card p-3 rounded-2xl border cursor-pointer ${styleClass}">
                 <span class="text-xs font-black block uppercase">${safeTitle} ${item.kind.icon}</span>
                 <span class="text-[10px] font-bold text-slate-700 block mt-1">${safeName}</span>
                 <span class="text-[10px] font-medium text-slate-500 block mt-1">Data ${sourceLabel} • keyword: ${safeKeyword}</span>
@@ -1211,14 +1211,14 @@ function injectAnalyticsDashboard() {
             <span class="text-[10px] font-medium text-slate-500 block mt-1">${leisureCount} RTH, ${nightCount} hiburan</span>
         </div>
         <div class="border-r border-slate-100 p-2 text-center md:text-left z-10">
-            <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 block">3D Source</span>
-            <span class="text-2xl font-black text-indigo-500">OSM</span>
-            <span class="text-[10px] font-medium text-slate-500 block mt-1">Fallback block aktif bila API lambat</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 block">Mini Game</span>
+            <span class="text-2xl font-black text-pink-500">Kartu</span>
+            <span class="text-[10px] font-medium text-slate-500 block mt-1">Pesan semangat random untuk user</span>
         </div>
         <div class="p-2 text-center md:text-left z-10">
             <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 block">Relief Buffer Radius</span>
             <span class="text-2xl font-black text-amber-500">${radius} m</span>
-            <span class="text-[10px] font-medium text-slate-500 block mt-1">Dipakai oleh 2D dan 3D Game</span>
+            <span class="text-[10px] font-medium text-slate-500 block mt-1">Dipakai untuk analisis buffer 2D</span>
         </div>
     `;
     mainArea.insertBefore(banner, mainArea.firstChild);
@@ -1274,9 +1274,9 @@ function generatePremiumPopupHTML(loc) {
                     📍 ${loc.alamat}
                 </div>
                 
-                <button onclick="focusLocationIn3D(${loc.coord[0]}, ${loc.coord[1]}, '${loc.name.replace(/'/g, "\\'")}')" 
-                    style="width:100%; margin-top:14px; padding:10px; background:linear-gradient(90deg, #8b5cf6, #6366f1); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(99,102,241,0.3); transition: transform 0.2s;">
-                    🎮 Lihat di 3D Game
+                <button onclick="openHappyCards()" 
+                    style="width:100%; margin-top:14px; padding:10px; background:linear-gradient(90deg, #ec4899, #f59e0b); color:#fff; border:none; border-radius:12px; font-size:12px; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(236,72,153,0.25); transition: transform 0.2s;">
+                    🎴 Ambil Kartu Bahagia
                 </button>
             </div>
         </div>
@@ -1491,6 +1491,155 @@ window.toggleBacksound = function() {
 
 updateBufferRadiusLabel();
 updateToggleBadges();
+
+
+
+
+/* =========================
+   MINI GAME: KARTU BAHAGIA
+   Mode 3D dihapus. Game ini ringan, offline, dan aman untuk GitHub Pages.
+========================= */
+const happyMessages = [
+    { title: 'Kartu Tenang', text: 'Hari ini tidak harus sempurna. Cukup lanjutkan pelan-pelan, satu langkah kecil tetap punya arti.' },
+    { title: 'Kartu Berani', text: 'Kamu sudah melewati banyak hal. Pilihanmu untuk tetap mencoba adalah bukti kalau kamu kuat.' },
+    { title: 'Kartu Fokus', text: 'Tarik napas sebentar. Pilih satu hal penting, kerjakan dengan tenang, lalu beri dirimu waktu istirahat.' },
+    { title: 'Kartu Cerah', text: 'Ada banyak hal baik yang masih bisa datang hari ini. Tetap buka ruang untuk senyum kecil.' },
+    { title: 'Kartu Semangat', text: 'Kamu tidak harus cepat. Yang penting tetap bergerak dan tidak terlalu keras pada diri sendiri.' },
+    { title: 'Kartu Percaya Diri', text: 'Kemampuanmu tumbuh setiap kali kamu mencoba. Kesalahan bukan akhir, itu bagian dari proses belajar.' },
+    { title: 'Kartu Bahagia', text: 'Ambil jeda. Minum air. Lihat sekitar. Hal sederhana juga bisa membuat pikiran terasa lebih ringan.' },
+    { title: 'Kartu Damai', text: 'Tidak semua hal perlu diselesaikan sekarang. Kamu boleh mengatur ulang energi dan memulai lagi.' },
+    { title: 'Kartu Apresiasi', text: 'Terima kasih sudah bertahan sejauh ini. Usahamu hari ini tetap layak dihargai.' },
+    { title: 'Kartu Harapan', text: 'Langkah kecil hari ini bisa membuka jalan baru besok. Tetap percaya pada prosesmu.' },
+    { title: 'Kartu Ringan', text: 'Lepaskan sedikit beban yang tidak perlu kamu bawa. Fokus pada hal yang bisa kamu kendalikan.' },
+    { title: 'Kartu Senyum', text: 'Semoga ada satu hal kecil yang membuatmu tersenyum hari ini, walau cuma sebentar.' }
+];
+
+let currentHappyCards = [];
+let happyCardPicked = false;
+
+function pickRandomHappyCards() {
+    const pool = [...happyMessages].sort(() => Math.random() - 0.5);
+    return pool.slice(0, 4);
+}
+
+function renderHappyCards() {
+    const grid = document.getElementById('happy-card-grid');
+    const result = document.getElementById('happy-card-result');
+    const instruction = document.getElementById('happy-card-instruction');
+    if (!grid) return;
+
+    happyCardPicked = false;
+    currentHappyCards = pickRandomHappyCards();
+    if (result) result.classList.add('hidden');
+    if (instruction) instruction.classList.remove('hidden');
+
+    grid.innerHTML = currentHappyCards.map((card, index) => `
+        <button type="button" class="happy-card happy-card-enter" style="animation-delay:${index * 0.12}s" onclick="chooseHappyCard(${index})" aria-label="Pilih kartu bahagia ${index + 1}">
+            <div class="happy-card-inner">
+                <div class="happy-card-front">
+                    <span class="happy-card-number">0${index + 1}</span>
+                    <span class="happy-card-icon">💌</span>
+                    <span class="happy-card-label">Pilih Kartu</span>
+                </div>
+                <div class="happy-card-back">
+                    <span class="happy-back-title">${card.title}</span>
+                    <span class="happy-back-text">${card.text}</span>
+                </div>
+            </div>
+        </button>
+    `).join('');
+}
+
+window.chooseHappyCard = function(index) {
+    if (happyCardPicked) return;
+    const card = currentHappyCards[index];
+    if (!card) return;
+
+    happyCardPicked = true;
+    const cards = document.querySelectorAll('.happy-card');
+    cards.forEach((el, i) => {
+        if (i === index) {
+            el.classList.add('is-picked');
+            el.setAttribute('aria-pressed', 'true');
+        } else {
+            el.classList.add('is-muted');
+            el.setAttribute('aria-pressed', 'false');
+        }
+    });
+
+    const result = document.getElementById('happy-card-result');
+    const title = document.getElementById('happy-result-title');
+    const text = document.getElementById('happy-result-text');
+    const instruction = document.getElementById('happy-card-instruction');
+    if (title) title.textContent = card.title;
+    if (text) text.textContent = card.text;
+    if (instruction) instruction.classList.add('hidden');
+    if (result) {
+        result.classList.remove('hidden');
+        result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    const statusEl = document.getElementById('system-status');
+    if (statusEl) statusEl.textContent = `🎴 ${card.title} terbuka. Semoga pesan ini bikin harimu lebih ringan.`;
+};
+
+window.shuffleHappyCards = function() {
+    renderHappyCards();
+    const statusEl = document.getElementById('system-status');
+    if (statusEl) statusEl.textContent = '🎴 Kartu Bahagia diacak ulang. Pilih satu kartu.';
+};
+
+window.openHappyCards = function() {
+    const modal = document.getElementById('happy-card-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    renderHappyCards();
+    const statusEl = document.getElementById('system-status');
+    if (statusEl) statusEl.textContent = '🎴 Mini game Kartu Bahagia aktif.';
+};
+
+window.closeHappyCards = function() {
+    const modal = document.getElementById('happy-card-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.focusMapLocation = function(lat, lng, name = 'Lokasi') {
+    if (!leafletMap) return;
+    leafletMap.setView([lat, lng], 17);
+    const statusEl = document.getElementById('system-status');
+    if (statusEl) statusEl.textContent = `📍 Fokus ke ${name} pada peta 2D.`;
+};
+
+// Override mode peta agar tidak ada lagi akses 3D.
+window.switchEngine = function() {
+    currentEngine = '2d';
+    const btn2d = document.getElementById('btn-2d');
+    const elLeaflet = document.getElementById('map-leaflet');
+    if (elLeaflet) {
+        elLeaflet.style.zIndex = '10';
+        elLeaflet.style.display = 'block';
+        setTimeout(() => leafletMap?.invalidateSize(), 150);
+    }
+    if (btn2d) btn2d.className = 'px-5 py-2 text-xs font-bold rounded-xl bg-white text-indigo-600 shadow-md cursor-pointer transition-all';
+};
+
+// Override intro: setelah masuk web, kartu muncul otomatis dengan animasi.
+window.exitIntroScreen = function() {
+    const intro = document.getElementById('intro-screen');
+    if (!intro) {
+        openHappyCards();
+        return;
+    }
+    intro.style.opacity = '0';
+    setTimeout(() => {
+        intro.style.display = 'none';
+        leafletMap?.invalidateSize();
+        setTimeout(() => openHappyCards(), 350);
+    }, 700);
+};
 
 
 /* =========================
